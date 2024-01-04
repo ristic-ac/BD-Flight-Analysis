@@ -12,11 +12,19 @@ def quiet_logs(sc):
   logger.LogManager.getLogger("org"). setLevel(logger.Level.ERROR)
   logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
 
+input_uri = "mongodb://mongodb:27017/flights.flights_germany"
+output_uri = "mongodb://mongodb:27017/flights.flights_germany"
+
 # Create a SparkSession
 spark = SparkSession \
     .builder \
     .appName("Python Spark SQL - Query 1") \
+    .master('local')\
+    .config("spark.mongodb.input.uri", input_uri) \
+    .config("spark.mongodb.output.uri", output_uri) \
+    .config('spark.jars.packages','org.mongodb.spark:mongo-spark-connector_2.12:3.0.1') \
     .getOrCreate()
+
 
 quiet_logs(spark)
 
@@ -130,5 +138,14 @@ df_with_array = df_with_array.withColumn("segmentsArrivalTimeRaw", string_to_arr
 MONGO_DATABASE = "flights"
 MONGO_COLLECTION = "flights_germany"
 
+df_with_array.select("startingAirport", "totalFare").groupBy("startingAirport").max("totalFare").show()
+
 # Select group by startingAirport aggregate max totalFare and write to mongodb
-df_with_array.select("startingAirport", "totalFare").groupBy("startingAirport").max("totalFare").write.format("mongodb").mode("append").option("database", MONGO_DATABASE).option("collection", MONGO_COLLECTION).save()
+df_with_array.select("startingAirport", "totalFare") \
+    .groupBy("startingAirport").max("totalFare") \
+    .write.format("com.mongodb.spark.sql.DefaultSource") \
+    .mode("overwrite") \
+    .option("uri", output_uri) \
+    .option("database", MONGO_DATABASE) \
+    .option("collection", MONGO_COLLECTION) \
+    .save()

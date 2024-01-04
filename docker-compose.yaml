@@ -9,7 +9,7 @@ services:
       - 9000:9000
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
-      - /media/branislav/Warehouse/ASVSP_PROJEKAT:/data
+      - ./sample_data/:/data/
     environment:
       - CLUSTER_NAME=test
     env_file:

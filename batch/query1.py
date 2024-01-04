@@ -22,7 +22,7 @@ spark = SparkSession \
     .master('local')\
     .config("spark.mongodb.input.uri", input_uri) \
     .config("spark.mongodb.output.uri", output_uri) \
-    .config('spark.jars.packages','org.mongodb.spark:mongo-spark-connector_2.12:3.0.1') \
+    .config('spark.jars.packages','org.mongodb.spark:mongo-spark-connector_2.12:3.0.2') \
     .getOrCreate()
 
 
@@ -138,11 +138,12 @@ df_with_array = df_with_array.withColumn("segmentsArrivalTimeRaw", string_to_arr
 MONGO_DATABASE = "flights"
 MONGO_COLLECTION = "flights_germany"
 
-df_with_array.select("startingAirport", "totalFare").groupBy("startingAirport").max("totalFare").show()
+QUERY1 = df_with_array.select("startingAirport", "totalFare").groupBy("startingAirport").max("totalFare")
+
+QUERY1.show()
 
 # Select group by startingAirport aggregate max totalFare and write to mongodb
-df_with_array.select("startingAirport", "totalFare") \
-    .groupBy("startingAirport").max("totalFare") \
+QUERY1 \
     .write.format("com.mongodb.spark.sql.DefaultSource") \
     .mode("overwrite") \
     .option("uri", output_uri) \

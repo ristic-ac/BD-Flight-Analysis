@@ -12,6 +12,8 @@ def quiet_logs(sc):
 spark = SparkSession \
     .builder \
     .appName("SSS - Query 1") \
+    .master('local')\
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1") \
     .getOrCreate()
 
 quiet_logs(spark)
@@ -47,7 +49,7 @@ schema = StructType([
 df = spark \
   .readStream \
   .format("kafka") \
-  .option("kafka.bootstrap.servers", "kafka1:9092") \
+  .option("kafka.bootstrap.servers", "kafka1:19092") \
   .option("subscribe", "flights_germany") \
   .load() \
   .withColumn("parsed_value", F.from_json(F.col("value").cast("string"), schema))

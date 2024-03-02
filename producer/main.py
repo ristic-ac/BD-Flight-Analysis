@@ -5,8 +5,11 @@ from kafka import KafkaProducer
 import kafka.errors
 import pandas as pd
 
-KAFKA_BROKER = os.environ["KAFKA_BROKER"]
-TOPIC = os.environ["TOPIC"]
+# KAFKA_BROKER = os.environ["KAFKA_BROKER"]
+# TOPIC = os.environ["TOPIC"]
+
+KAFKA_BROKER = "localhost:9092"
+TOPIC = "flights_germany"
 
 # Load the CSV file into pandas dataframe
 df = pd.read_csv("flights_germany.csv")
@@ -20,6 +23,10 @@ while True:
             key = row["key"]
             # Value is row without key
             row = row.drop("key")
+            # Set price to float
+            row["price"] = float(row["price"])
+            # Set stops to int
+            row["stops"] = int(row["stops"])
             # Send the message
             producer.send(TOPIC, key=str(key).encode(), value=row.to_json().encode())
             print(row.to_json())

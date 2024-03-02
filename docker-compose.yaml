@@ -123,11 +123,6 @@ services:
       - kafka1:/var/lib/kafka/data
     depends_on:
       - zookeeper
-    healthcheck:
-      test: [ "CMD", "kafka-topics", "--list", "--zookeeper", "zookeeper:2181" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
   
   kafka-producer:
     build: ./producer
@@ -135,8 +130,7 @@ services:
     environment:
       KAFKA_BROKER: "kafka1:19092"
     depends_on:
-      kafka1:
-        condition: service_healthy
+      - kafka1
 
   mongodb:
     image: mongo

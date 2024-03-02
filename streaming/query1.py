@@ -20,28 +20,26 @@ quiet_logs(spark)
 
 # Set schema
 # Schema:
-# departure_city: String
-# arrival_city: String
-# scrape_date: Date
-# departure_date: Date
-# Departure_date_distance: Time interval (String?, Unix time?)
-# departure_time: Time
-# arrival_time: Time
-# airline: String
-# stops: Int
-# price: Float
+# departure_city                TXL Berlin-Tegel
+# arrival_city                    DUS Düsseldorf
+# scrape_date                         2019-10-18
+# departure_date_distance                    1.0
+# airline                                easyJet
+# stops                                        0
+# price                                   131.00
+# departure                  2019-10-25 21:25:00
+# arrival                    2019-10-25 22:40:00
 
 schema = StructType([
   StructField("departure_city", StringType(), True),
   StructField("arrival_city", StringType(), True),
   StructField("scrape_date", DateType(), True),
-  StructField("departure_date", DateType(), True),
   StructField("departure_date_distance", StringType(), True),
-  StructField("departure_time", TimestampType(), True),
-  StructField("arrival_time", TimestampType(), True),
   StructField("airline", StringType(), True),
   StructField("stops", IntegerType(), True),
-  StructField("price", FloatType(), True)
+  StructField("price", FloatType(), True),
+  StructField("departure", TimestampType(), True),
+  StructField("arrival", TimestampType(), True)
 ])
 
 # Read data from Kafka topic "flights_germany" 
@@ -52,9 +50,11 @@ df = spark \
   .option("kafka.bootstrap.servers", "kafka1:19092") \
   .option("subscribe", "flights_germany") \
   .load() \
-  # .withColumn("parsed_value", F.from_json(F.col("value").cast("string"), schema))
+  .withColumn("parsed_value", from_json(col("value").cast("string"), schema)) \
+  .select("parsed_value.*") \
 
-print(df)
+  # .withColumn("value", F.col("value").cast("string")) \
+  # .select("value") \
 
 df.writeStream \
     .outputMode("append") \
@@ -62,38 +62,5 @@ df.writeStream \
     .option("truncate", "false") \
     .start()
 
-# Value read from Kafka topic are pandas dataframe rows, and keys are ints, so we need to convert them to Spark
-# dataframe columns
-# df = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
 
-# # Print schema
-# df.printSchema()
-
-# # Cast value column to schema and key column to integer
-# df = df.select(from_json(col("value").cast("string"), schema).alias("data"), col("key").cast("int"))
-
-# # Print schema
-# df.printSchema()
-
-# # Explode data column
-# df = df.selectExpr("data.departure_city", "data.arrival_city", "data.scrape_date", "data.departure_date", "data.departure_date_distance", "data.departure_time", "data.arrival_time", "data.airline", "data.stops", "data.price", "key")
-
-# # Print schema
-# df.printSchema()
-
-# # Get departure city and arrival city pairs from the dataframe
-# df = df.select("departure_city", "arrival_city").distinct()
-
-# # Print dataframe
-# df.printSchema()
-
-# # Write to MongoDB
-# query = df \
-#   .writeStream \
-#   .outputMode("append") \
-#   .format("mongo") \
-#   .option("uri", "mongodb://mongodb:27017/") \
-#   .option("database", "flights") \
-#   .option("collection", "flights_germany") \
-#   .start()
 spark.streams.awaitAnyTermination()

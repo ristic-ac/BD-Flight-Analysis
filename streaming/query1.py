@@ -52,7 +52,9 @@ df = spark \
   .option("kafka.bootstrap.servers", "kafka1:19092") \
   .option("subscribe", "flights_germany") \
   .load() \
-  .withColumn("parsed_value", F.from_json(F.col("value").cast("string"), schema))
+  # .withColumn("parsed_value", F.from_json(F.col("value").cast("string"), schema))
+
+print(df)
 
 df.writeStream \
     .outputMode("append") \

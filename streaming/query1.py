@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
+import os
 
 
 def quiet_logs(sc):
@@ -55,6 +56,15 @@ df = spark \
 
   # .withColumn("value", F.col("value").cast("string")) \
   # .select("value") \
+
+# Define HDFS namenode
+HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
+
+# Read the CSV file
+df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
+
+# Print df_airports
+df_airports.show()
 
 df.writeStream \
     .outputMode("append") \

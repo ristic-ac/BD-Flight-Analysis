@@ -25,6 +25,8 @@ while True:
             row["stops"] = int(row["stops"])
             # Cast price to float
             row["price"] = float(row["price"])
+            # Cast departure_date_distance to int
+            row["departure_date_distance"] = int(row["departure_date_distance"])
             # Send the message
             producer.send(TOPIC, key=str(key).encode(), value=row.to_json().encode())
             print(row.to_json())

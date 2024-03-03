@@ -31,8 +31,8 @@ quiet_logs(spark)
 # arrival                    2019-10-25 22:40:00
 
 schema = StructType([
-  StructField("departure_city", StringType(), True),
-  StructField("arrival_city", StringType(), True),
+  StructField("departure_code", StringType(), True),
+  StructField("arrival_code", StringType(), True),
   StructField("scrape_date", DateType(), True),
   StructField("departure_date_distance", StringType(), True),
   StructField("airline", StringType(), True),

@@ -163,3 +163,4 @@ producer/flights_germany_uncleaned.csv
 
 mongodb-data/
 metabase-data/
+producer/flights_germany.csv

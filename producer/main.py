@@ -16,10 +16,15 @@ while True:
         # Connect to Kafka
         producer = KafkaProducer(bootstrap_servers=KAFKA_BROKER)
         for index, row in df.iterrows():
+            print("Sending message to Kafka")
             # Extract the key and value from the row
             key = row["key"]
             # Value is row without key
             row = row.drop("key")
+            # Cast stop to int
+            row["stops"] = int(row["stops"])
+            # Cast price to float
+            row["price"] = float(row["price"])
             # Send the message
             producer.send(TOPIC, key=str(key).encode(), value=row.to_json().encode())
             print(row.to_json())

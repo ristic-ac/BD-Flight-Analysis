@@ -135,8 +135,10 @@ services:
     environment:
       KAFKA_BROKER: "kafka1:19092"
     depends_on:
-      kafka1:
-        condition: service_healthy
+      - kafka1
+    volumes:
+      - ./producer/main.py:/usr/src/app/main.py
+      - ./producer/flights_germany.csv:/usr/src/app/flights_germany.csv
 
   mongodb:
     image: mongo

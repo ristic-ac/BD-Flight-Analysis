@@ -133,7 +133,7 @@ services:
       - kafka1
     volumes:
       - ./producer/main.py:/usr/src/app/main.py
-      - ./producer/flights_germany.csv:/usr/src/app/flights_germany.csv
+      - ./sample_data/flights_germany.csv:/usr/src/app/flights_germany.csv
 
   mongodb:
     image: mongo

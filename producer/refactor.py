@@ -118,4 +118,4 @@ print("City names extracted and saved to 'airports.csv'")
 df = df.drop(['departure_city', 'arrival_city', 'departure_name', 'arrival_name'], axis=1)
 
 # Save the cleaned dataframe to a new csv file
-df.to_csv('flights_germany.csv', index=False)
+df.to_csv('../sample_data/flights_germany.csv', index=False)

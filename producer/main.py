@@ -16,6 +16,7 @@ while True:
         # Connect to Kafka
         producer = KafkaProducer(bootstrap_servers=KAFKA_BROKER)
         for index, row in df.iterrows():
+            print("Sending message to Kafka")
             # Extract the key and value from the row
             key = row["key"]
             # Value is row without key

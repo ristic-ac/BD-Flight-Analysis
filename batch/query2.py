@@ -15,7 +15,7 @@ OUTPUT_URI = INPUT_URI
 # Create a SparkSession
 spark = SparkSession \
     .builder \
-    .appName("Python Spark SQL - Query 1") \
+    .appName("Python Spark SQL - Query 2") \
     .master('local')\
     .config("spark.mongodb.input.uri", INPUT_URI) \
     .config("spark.mongodb.output.uri", OUTPUT_URI) \

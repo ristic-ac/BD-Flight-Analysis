@@ -141,7 +141,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./mongodb-data:/data/db
+      - mongodb:/data/db
     depends_on:
       - namenode
       - spark-master
@@ -152,7 +152,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./metabase-data:/metabase-data
+      - metabase:/metabase-data
     depends_on:
       - namenode
       - spark-master
@@ -163,3 +163,5 @@ volumes:
   # hadoop_datanode2:
   # hadoop_datanode3:
   kafka1:
+  metabase:
+  mongodb:

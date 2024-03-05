@@ -24,15 +24,23 @@ spark = SparkSession \
 
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
-df.show()
+# df.show()
 
-target_date = datetime.strptime("2019-11-28", "%Y-%m-%d").date()
+df.printSchema()
 
-# For each airport, determine the flight on the 4th of July for which there were the most available seats to BOS 
-QUERY2 = df.filter(df.flightDate == target_date) \
-    # .filter(df["destinationAirport"] == "BOS") \
-    # .groupBy("startingAirport") \
-    # .max("seatsRemaining")
+# For each airport, determine the flight on the 4th of July for which there were the average available seats to BOS 
+QUERY2 = df.filter(df.flightDate == "2022-04-17") \
+    .filter(df["destinationAirport"] == "BOS") \
+    .groupBy("startingAirport") \
+    .agg(F.round(F.avg("seatsRemaining"), 2).alias("avgSeatsRemaining"))
 
 # Print on console
 QUERY2.show()
+
+QUERY2 \
+    .write.format("com.mongodb.spark.sql.DefaultSource") \
+    .mode("overwrite") \
+    .option("uri", OUTPUT_URI) \
+    .option("database", MONGO_DATABASE) \
+    .option("collection", MONGO_COLLECTION) \
+    .save()

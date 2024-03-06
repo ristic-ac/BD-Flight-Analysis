@@ -35,17 +35,17 @@
 #  |    |-- element: string (containsNull = true)
 #  |-- startingAirport: string (nullable = true)
 #  |-- totalFare: double (nullable = true)
-#  |-- travelDuration: string (nullable = true)
+#  |-- travelDurationMinutes: integer (nullable = true)
 
 from datetime import datetime
 import os
 from pyspark.sql import SparkSession, Row
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, concat_ws, sort_array, array, array_sort
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
 
 MONGO_DATABASE = "flights"
-MONGO_COLLECTION = "query6"
+MONGO_COLLECTION = "query8"
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 
 INPUT_URI = "mongodb://mongodb:27017/" + MONGO_DATABASE + "." + MONGO_COLLECTION
@@ -67,19 +67,27 @@ df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 df.printSchema()
 
-# Determine the airport with the most number of landing flights 
-QUERY6 = df.select(F.explode("segmentsArrivalAirportCode").alias("arrivalAirport")) \
-    .groupBy("arrivalAirport").count() \
-    .orderBy(col("count").desc()) \
-    .limit(1)
+# Determine the minimum travel duration
+
+minTravelTime = df.agg(F.min("travelDurationMinutes")).collect()[0][0]
+
+print(minTravelTime)
+
+# Find those who have the minimum travel duration or 5 minutes more than the minimum travel duration
+QUERY8 = df.filter(df.travelDurationMinutes < minTravelTime + 5). \
+    select("startingAirport", "destinationAirport"). \
+    distinct() \
+    .withColumn("flight", array_sort(array(col("startingAirport"), col("destinationAirport")))) \
+    .drop("startingAirport", "destinationAirport") \
+    .distinct() \
 
 # # Print on console
-QUERY6.show()
+QUERY8.show()
 
-QUERY6 \
-    .write.format("com.mongodb.spark.sql.DefaultSource") \
-    .mode("overwrite") \
-    .option("uri", OUTPUT_URI) \
-    .option("database", MONGO_DATABASE) \
-    .option("collection", MONGO_COLLECTION) \
-    .save()
+# QUERY7 \
+#     .write.format("com.mongodb.spark.sql.DefaultSource") \
+#     .mode("overwrite") \
+#     .option("uri", OUTPUT_URI) \
+#     .option("database", MONGO_DATABASE) \
+#     .option("collection", MONGO_COLLECTION) \
+#     .save()

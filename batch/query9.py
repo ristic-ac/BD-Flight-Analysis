@@ -35,17 +35,17 @@
 #  |    |-- element: string (containsNull = true)
 #  |-- startingAirport: string (nullable = true)
 #  |-- totalFare: double (nullable = true)
-#  |-- travelDuration: string (nullable = true)
+#  |-- travelDurationMinutes: integer (nullable = true)
 
 from datetime import datetime
 import os
 from pyspark.sql import SparkSession, Row
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, concat_ws, sort_array, array, array_sort
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
 
 MONGO_DATABASE = "flights"
-MONGO_COLLECTION = "query6"
+MONGO_COLLECTION = "query9"
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 
 INPUT_URI = "mongodb://mongodb:27017/" + MONGO_DATABASE + "." + MONGO_COLLECTION
@@ -67,19 +67,32 @@ df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 df.printSchema()
 
-# Determine the airport with the most number of landing flights 
-QUERY6 = df.select(F.explode("segmentsArrivalAirportCode").alias("arrivalAirport")) \
-    .groupBy("arrivalAirport").count() \
-    .orderBy(col("count").desc()) \
-    .limit(1)
+# Sort by available seats descending, extract number of seatsRemaning
+QUERY9 = df.orderBy(col("seatsRemaining").desc()).limit(10) \
 
+maxSeats = QUERY9.select(col("seatsRemaining")) \
+    .collect()[0][0]
+
+print(maxSeats)
+
+# Select those with the maximum number of seats
+QUERY9 = QUERY9.filter(col("seatsRemaining") == maxSeats) \
+    .select(
+        col("legId"),
+        col("flightDate"),
+        col("startingAirport"),
+        col("destinationAirport"),
+        col("seatsRemaining"),
+    )
+        
+    
 # # Print on console
-QUERY6.show()
+QUERY9.show()
 
-QUERY6 \
-    .write.format("com.mongodb.spark.sql.DefaultSource") \
-    .mode("overwrite") \
-    .option("uri", OUTPUT_URI) \
-    .option("database", MONGO_DATABASE) \
-    .option("collection", MONGO_COLLECTION) \
-    .save()
+# QUERY7 \
+#     .write.format("com.mongodb.spark.sql.DefaultSource") \
+#     .mode("overwrite") \
+#     .option("uri", OUTPUT_URI) \
+#     .option("database", MONGO_DATABASE) \
+#     .option("collection", MONGO_COLLECTION) \
+#     .save()

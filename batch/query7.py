@@ -45,7 +45,7 @@ from pyspark.sql.types import *
 from pyspark.sql import functions as F
 
 MONGO_DATABASE = "flights"
-MONGO_COLLECTION = "query6"
+MONGO_COLLECTION = "query7"
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 
 INPUT_URI = "mongodb://mongodb:27017/" + MONGO_DATABASE + "." + MONGO_COLLECTION
@@ -67,19 +67,22 @@ df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 df.printSchema()
 
-# Determine the airport with the most number of landing flights 
-QUERY6 = df.select(F.explode("segmentsArrivalAirportCode").alias("arrivalAirport")) \
-    .groupBy("arrivalAirport").count() \
-    .orderBy(col("count").desc()) \
-    .limit(1)
+# Determine the number of flights that depart between 00:00 and 04:00 for each airport
+QUERY7 = df.withColumn("departureTime", F.col("segmentsDepartureTimeRaw")[0]) \
+           .withColumn("hour", F.hour(F.col("departureTime"))) \
+           .filter((F.col("hour") >= 0) & (F.col("hour") <= 4)) \
+           .select("startingAirport", "destinationAirport", "departureTime", "hour") \
+           .groupBy("startingAirport") \
+           .count() \
+      
 
 # # Print on console
-QUERY6.show()
+QUERY7.show()
 
-QUERY6 \
-    .write.format("com.mongodb.spark.sql.DefaultSource") \
-    .mode("overwrite") \
-    .option("uri", OUTPUT_URI) \
-    .option("database", MONGO_DATABASE) \
-    .option("collection", MONGO_COLLECTION) \
-    .save()
+# QUERY7 \
+#     .write.format("com.mongodb.spark.sql.DefaultSource") \
+#     .mode("overwrite") \
+#     .option("uri", OUTPUT_URI) \
+#     .option("database", MONGO_DATABASE) \
+#     .option("collection", MONGO_COLLECTION) \
+#     .save()

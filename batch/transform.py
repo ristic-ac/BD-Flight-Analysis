@@ -115,17 +115,25 @@ df_with_array = df_with_array.withColumn("segmentsCabinCode", string_to_array_st
 # df_with_array.select("segmentsArrivalAirportCode", "segmentsDepartureAirportCode", "segmentsAirlineName", "segmentsAirlineCode", "segmentsEquipmentDescription", "segmentsCabinCode").show(20, False)
 
 # From StringType() to ArrayType(DateType()), delimited by "||"
-def string_to_array_date(column):
+def string_to_array_timestamp(column):
     column_name = column._jc.toString()
-    return F.split(column, "\|\|").cast("array<date>").alias(column_name)
+    return F.split(column, "\|\|").cast("array<timestamp>").alias(column_name)
 
 # Applying the transformation to the column segmentsDepartureTimeRaw
-df_with_array = df_with_array.withColumn("segmentsDepartureTimeRaw", string_to_array_date(df["segmentsDepartureTimeRaw"]))
+df_with_array = df_with_array.withColumn("segmentsDepartureTimeRaw", string_to_array_timestamp(df["segmentsDepartureTimeRaw"]))
 
 # Applying the transformation to the column segmentsArrivalTimeRaw
-df_with_array = df_with_array.withColumn("segmentsArrivalTimeRaw", string_to_array_date(df["segmentsArrivalTimeRaw"]))
+df_with_array = df_with_array.withColumn("segmentsArrivalTimeRaw", string_to_array_timestamp(df["segmentsArrivalTimeRaw"]))
 
 # Print converted columns in df_with_array
 # df_with_array.select("segmentsDepartureTimeRaw", "segmentsArrivalTimeRaw").show(20, False)
+
+# Calculate the total duration in minutes
+df_with_array = df_with_array.withColumn("travelDurationMinutes", \
+                                         F.regexp_extract(df["travelDuration"], "PT(\d+)H", 1).cast(IntegerType()) * 60 \
+                                         + F.regexp_extract(df["travelDuration"], "PT\d+H(\d+)M", 1).cast(IntegerType()))
+
+# Drop the column travelDuration
+df_with_array = df_with_array.drop("travelDuration")
 
 df_with_array.write.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")

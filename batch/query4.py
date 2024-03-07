@@ -69,8 +69,8 @@ df.printSchema()
 
 # Determine ratio of isBasicEconomy to total flights
 QUERY4 = df.groupBy("isBasicEconomy") \
-    .count() \
-    .withColumn("ratio", col("count") / df.count())
+           .count() \
+           .withColumn("ratio", col("count") / df.count())
 
 # # Print on console
 QUERY4.show()

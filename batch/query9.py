@@ -77,19 +77,19 @@ print(maxSeats)
 
 # Select those with the maximum number of seats
 QUERY9 = QUERY9.filter(col("seatsRemaining") == maxSeats) \
-    .select(
-        col("legId"),
-        col("flightDate"),
-        col("startingAirport"),
-        col("destinationAirport"),
-        col("seatsRemaining"),
-    )
+               .select(
+                   col("legId"),
+                   col("flightDate"),
+                   col("startingAirport"),
+                   col("destinationAirport"),
+                   col("seatsRemaining"),
+               )
         
     
 # # Print on console
 QUERY9.show()
 
-# QUERY7 \
+# QUERY9 \
 #     .write.format("com.mongodb.spark.sql.DefaultSource") \
 #     .mode("overwrite") \
 #     .option("uri", OUTPUT_URI) \

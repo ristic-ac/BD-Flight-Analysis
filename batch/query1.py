@@ -24,7 +24,9 @@ spark = SparkSession \
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 # Find most expensive flight from each startingAirport
-QUERY1 = df.select("startingAirport", "totalFare").groupBy("startingAirport").max("totalFare")
+QUERY1 = df.select("startingAirport", "totalFare") \
+           .groupBy("startingAirport") \
+           .max("totalFare")
 
 QUERY1.show()
 

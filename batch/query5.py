@@ -69,9 +69,9 @@ df.printSchema()
 
 # Determine ratio of isBasicEconomy to total flights
 QUERY5 = df.filter(df["startingAirport"] == "LAX") \
-    .withColumn("tax", F.round(col("totalFare") - col("baseFare"), 2)) \
-    .groupBy("startingAirport") \
-    .agg(F.round(F.avg("tax"), 2).alias("avgTax"))
+           .withColumn("tax", F.round(col("totalFare") - col("baseFare"), 2)) \
+           .groupBy("startingAirport") \
+           .agg(F.round(F.avg("tax"), 2).alias("avgTax"))
 
 # # Print on console
 QUERY5.show()

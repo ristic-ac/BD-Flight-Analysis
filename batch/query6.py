@@ -69,9 +69,9 @@ df.printSchema()
 
 # Determine the airport with the most number of landing flights 
 QUERY6 = df.select(F.explode("segmentsArrivalAirportCode").alias("arrivalAirport")) \
-    .groupBy("arrivalAirport").count() \
-    .orderBy(col("count").desc()) \
-    .limit(1)
+           .groupBy("arrivalAirport").count() \
+           .orderBy(col("count").desc()) \
+           .limit(1)
 
 # # Print on console
 QUERY6.show()

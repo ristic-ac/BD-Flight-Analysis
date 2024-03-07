@@ -69,9 +69,9 @@ df.printSchema()
 
 # Determine 5 most common fareBasisCode  
 QUERY3 = df.groupBy("fareBasisCode") \
-    .count() \
-    .orderBy(col("count").desc()) \
-    .limit(5)
+           .count() \
+           .orderBy(col("count").desc()) \
+           .limit(5)
 
 # # Print on console
 QUERY3.show()

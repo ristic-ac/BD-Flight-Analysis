@@ -30,9 +30,9 @@ df.printSchema()
 
 # For each airport, determine the flight on the 4th of July for which there were the average available seats to BOS 
 QUERY2 = df.filter(df.flightDate == "2022-04-17") \
-    .filter(df["destinationAirport"] == "BOS") \
-    .groupBy("startingAirport") \
-    .agg(F.round(F.avg("seatsRemaining"), 2).alias("avgSeatsRemaining"))
+           .filter(df["destinationAirport"] == "BOS") \
+           .groupBy("startingAirport") \
+           .agg(F.round(F.avg("seatsRemaining"), 2).alias("avgSeatsRemaining"))
 
 # Print on console
 QUERY2.show()

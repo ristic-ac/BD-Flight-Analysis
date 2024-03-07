@@ -78,7 +78,7 @@ QUERY10 = df.select("legId", "totalFare", "isRefundable") \
 # # Print on console
 QUERY10.show()
 
-# QUERY7 \
+# QUERY10 \
 #     .write.format("com.mongodb.spark.sql.DefaultSource") \
 #     .mode("overwrite") \
 #     .option("uri", OUTPUT_URI) \

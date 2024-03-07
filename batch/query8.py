@@ -74,17 +74,17 @@ minTravelTime = df.agg(F.min("travelDurationMinutes")).collect()[0][0]
 print(minTravelTime)
 
 # Find those who have the minimum travel duration or 5 minutes more than the minimum travel duration
-QUERY8 = df.filter(df.travelDurationMinutes < minTravelTime + 5). \
-    select("startingAirport", "destinationAirport"). \
-    distinct() \
-    .withColumn("flight", array_sort(array(col("startingAirport"), col("destinationAirport")))) \
-    .drop("startingAirport", "destinationAirport") \
-    .distinct() \
+QUERY8 = df.filter(df.travelDurationMinutes < minTravelTime + 5) \
+           .select("startingAirport", "destinationAirport") \
+           .distinct() \
+           .withColumn("flight", array_sort(array(col("startingAirport"), col("destinationAirport")))) \
+           .drop("startingAirport", "destinationAirport") \
+           .distinct() \
 
 # # Print on console
 QUERY8.show()
 
-# QUERY7 \
+# QUERY8 \
 #     .write.format("com.mongodb.spark.sql.DefaultSource") \
 #     .mode("overwrite") \
 #     .option("uri", OUTPUT_URI) \

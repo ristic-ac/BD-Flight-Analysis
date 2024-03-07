@@ -19,18 +19,6 @@ spark = SparkSession \
 
 quiet_logs(spark)
 
-# Set schema
-# Schema:
-# departure_city                TXL Berlin-Tegel
-# arrival_city                    DUS Düsseldorf
-# scrape_date                         2019-10-18
-# departure_date_distance                    1.0
-# airline                                easyJet
-# stops                                        0
-# price                                   131.00
-# departure                  2019-10-25 21:25:00
-# arrival                    2019-10-25 22:40:00
-
 schema = StructType([
   StructField("departure_code", StringType(), True),
   StructField("arrival_code", StringType(), True),
@@ -45,7 +33,7 @@ schema = StructType([
 
 # Read data from Kafka topic "flights_germany" 
 
-df = spark \
+df_flights = spark \
   .readStream \
   .format("kafka") \
   .option("kafka.bootstrap.servers", "kafka1:19092") \
@@ -66,11 +54,18 @@ df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 # Print df_airports
 df_airports.show()
 
-df.writeStream \
-    .outputMode("append") \
-    .format("console") \
-    .option("truncate", "false") \
-    .start()
+df_flights.printSchema()
+
+# Find most presented departure arrival pair in df_flights
+df_flights \
+  .groupBy("departure_code", "arrival_code") \
+  .count() \
+  .orderBy(col("count").desc()) \
+  .writeStream \
+  .outputMode("complete") \
+  .format("console") \
+  .option("truncate", "false") \
+  .start()
 
 
 spark.streams.awaitAnyTermination()

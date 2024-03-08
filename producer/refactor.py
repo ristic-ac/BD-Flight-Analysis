@@ -33,15 +33,9 @@ def convert_to_24hr(time_str):
 df_flights["departure_time"] = df_flights["departure_time"].apply(convert_to_24hr)
 df_flights["arrival_time"] = df_flights["arrival_time"].apply(convert_to_24hr)
 
-# Combine departure_date and departure_time into a single column as strings
+# Combine departure_date and departure_time into a single column, as well as arrival_date and arrival_time
 df_flights["departure"] = df_flights["departure_date"] + " " + df_flights["departure_time"]
-df_flights.drop("departure_time", axis=1, inplace=True)
-
-# Combine arrival_date and arrival_time into a single column as strings
 df_flights["arrival"] = df_flights["departure_date"] + " " + df_flights["arrival_time"]
-df_flights.drop("arrival_time", axis=1, inplace=True)
-
-df_flights.drop("departure_date", axis=1, inplace=True)
 
 # Parse stops
 def parse_stops(stops):
@@ -81,6 +75,17 @@ df_flights["scrape_date"] = pd.to_datetime(df_flights["scrape_date"], format="%d
 # Convert to 2024-03-02 14:30 for departure and arrival
 df_flights["departure"] = pd.to_datetime(df_flights["departure"], format="%d.%m.%Y %H:%M")
 df_flights["arrival"] = pd.to_datetime(df_flights["arrival"], format="%d.%m.%Y %H:%M")
+
+# Check if departure_time is greater than arrival_time
+mask = df_flights["departure"] >= df_flights["arrival"]
+
+# Increase arrival date by 1 day for rows where departure_time is greater than arrival_time
+df_flights.loc[mask, "arrival"] += pd.DateOffset(days=1)
+
+# Drop the departure_date and arrival_date columns
+df_flights.drop("departure_time", axis=1, inplace=True)
+df_flights.drop("arrival_time", axis=1, inplace=True)
+df_flights.drop("departure_date", axis=1, inplace=True)
 
 
 # Extract unique values from the departure_city and arrival_city columns combined

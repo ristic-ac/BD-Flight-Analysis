@@ -67,7 +67,7 @@ df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 df.printSchema()
 
-# Determine ratio of isBasicEconomy to total flights
+# Determine average tax for flights from LAX
 QUERY5 = df.filter(df["startingAirport"] == "LAX") \
            .withColumn("tax", F.round(col("totalFare") - col("baseFare"), 2)) \
            .groupBy("startingAirport") \

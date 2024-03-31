@@ -66,18 +66,26 @@ df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 
 # Calculate the average price of flight for each airline, windowed every 1 minute with a 30 seconds delay.
 df_flights = df_flights \
-  .groupBy(window(df_flights.timestamp_received, "1 minute", "30 seconds"), "airline") \
+  .withWatermark("timestamp_received", "10 seconds") \
+  .groupBy(window("timestamp_received", "1 minute", "30 seconds"), "airline") \
   .agg(F.round(avg("price"), 2).alias("avg_price")) \
+
+df_flights_console = df_flights \
   .orderBy(col("window").desc(), col("avg_price").desc()) \
-  .limit(3)
-
-
-df_flights \
   .writeStream \
   .trigger(processingTime="2 seconds") \
   .outputMode("complete") \
   .format("console") \
   .option("truncate", "false") \
+  .start()
+
+df_flights_hdfs = df_flights \
+  .writeStream \
+  .trigger(processingTime="2 seconds") \
+  .outputMode("append") \
+  .format("json") \
+  .option("path", HDFS_NAMENODE + "/data/query5") \
+  .option("checkpointLocation", HDFS_NAMENODE + "/tmp/query5_checkpoint") \
   .start()
 
 spark.streams.awaitAnyTermination()

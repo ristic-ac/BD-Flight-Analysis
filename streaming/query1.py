@@ -40,7 +40,8 @@ df_flights = spark \
   .option("subscribe", "flights_germany") \
   .load() \
   .withColumn("parsed_value", from_json(col("value").cast("string"), schema)) \
-  .select("parsed_value.*") \
+  .withColumn("timestamp_received", col("timestamp")) \
+  .select("timestamp_received", "parsed_value.*") \
 
   # .withColumn("value", F.col("value").cast("string")) \
   # .select("value") \
@@ -58,21 +59,29 @@ df_flights.printSchema()
 
 # Find most presented departure,arrival column pair in df_flights, windowed by 15 minutes with 5 minutes sliding interval
 df_flights = df_flights \
-  .withWatermark("departure", "15 minutes") \
+  .withWatermark("timestamp_received", "10 seconds") \
   .groupBy(
-    window("departure", "15 minutes", "5 minutes"),
+    window("timestamp_received", "30 seconds", "5 seconds"),
     "departure_code", "arrival_code"
   ) \
   .count() \
-  .orderBy("window", "count", ascending=False)
 
-
-# Print 
-df_flights.writeStream \
+df_flights_console = df_flights \
+  .orderBy(col("window").desc(), col("count").desc()) \
+  .writeStream \
+  .trigger(processingTime="2 seconds") \
   .outputMode("complete") \
   .format("console") \
   .option("truncate", "false") \
   .start()
+
+# Save to HDFS
+df_flights_hdfs = df_flights.writeStream \
+  .outputMode("append") \
+  .format("json") \
+  .option("path", HDFS_NAMENODE + "/data/query1") \
+  .option("checkpointLocation", HDFS_NAMENODE + "/tmp/query1_checkpoint") \
+  .start()  
 
 
 spark.streams.awaitAnyTermination()

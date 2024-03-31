@@ -66,18 +66,26 @@ df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 
 # Calculate the maximum price for each departure_code, windowed every 1 minute with a 30 seconds delay.
 df_flights = df_flights \
-  .groupBy(window(df_flights.timestamp_received, "1 minute", "30 seconds"), "departure_code") \
+  .withWatermark("timestamp_received", "10 seconds") \
+  .groupBy(window("timestamp_received", "30 seconds", "30 seconds"), "departure_code") \
   .agg(max("price").alias("max_price")) \
+
+df_flights_console = df_flights \
   .orderBy(col("window").desc(), col("max_price").desc()) \
-  .limit(1)
-
-
-df_flights \
   .writeStream \
-  .trigger(processingTime="2 seconds") \
+  .trigger(processingTime="30 seconds") \
   .outputMode("complete") \
   .format("console") \
   .option("truncate", "false") \
+  .start()
+
+df_flights_hdfs = df_flights \
+  .writeStream \
+  .trigger(processingTime="30 seconds") \
+  .outputMode("append") \
+  .format("json") \
+  .option("path", HDFS_NAMENODE + "/data/query4") \
+  .option("checkpointLocation", HDFS_NAMENODE + "/tmp/query4_checkpoint") \
   .start()
 
 spark.streams.awaitAnyTermination()

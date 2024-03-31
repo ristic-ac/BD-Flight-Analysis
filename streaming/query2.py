@@ -65,12 +65,20 @@ df_flights = df_flights \
   .limit(5)
   
   
-df_flights \
+df_flights_console = df_flights \
   .writeStream \
   .trigger(processingTime="2 seconds") \
   .outputMode("complete") \
   .format("console") \
   .option("truncate", "false") \
   .start()
+
+# Save to HDFS
+df_flights_hdfs = df_flights.writeStream \
+  .outputMode("append") \
+  .format("json") \
+  .option("path", HDFS_NAMENODE + "/data/query1") \
+  .option("checkpointLocation", HDFS_NAMENODE + "/tmp/query1_checkpoint") \
+  .start() 
 
 spark.streams.awaitAnyTermination()

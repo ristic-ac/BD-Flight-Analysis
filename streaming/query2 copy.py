@@ -2,7 +2,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
-from pyspark.sql.window import Window
 import os
 
 
@@ -13,7 +12,7 @@ def quiet_logs(sc):
 
 spark = SparkSession \
     .builder \
-    .appName("SSS - Query 3") \
+    .appName("SSS - Query 2") \
     .master('local')\
     .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1") \
     .getOrCreate()
@@ -34,29 +33,17 @@ schema = StructType([
 
 # Read data from Kafka topic "flights_germany" 
 
-df_flights_raw = spark \
+df_flights = spark \
   .readStream \
   .format("kafka") \
   .option("kafka.bootstrap.servers", "kafka1:19092") \
   .option("subscribe", "flights_germany") \
   .load() \
-  # .withColumn("parsed_value", from_json(col("value").cast("string"), schema)) \
-  # .select("parsed_value.*") \
-
-df_flights_raw.printSchema()
-#  |-- key: binary (nullable = true)
-#  |-- value: binary (nullable = true)
-#  |-- topic: string (nullable = true)
-#  |-- partition: integer (nullable = true)
-#  |-- offset: long (nullable = true)
-#  |-- timestamp: timestamp (nullable = true)
-#  |-- timestampType: integer (nullable = true)
-
-# Take timestamp and parsed value from the value column
-df_flights = df_flights_raw \
   .withColumn("parsed_value", from_json(col("value").cast("string"), schema)) \
-  .withColumn("timestamp_received", col("timestamp")) \
-  .select("parsed_value.*", "timestamp_received") \
+  .select("parsed_value.*") \
+
+  # .withColumn("value", F.col("value").cast("string")) \
+  # .select("value") \
 
 # Define HDFS namenode
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
@@ -64,29 +51,26 @@ HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 # Read the CSV file
 df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 
-# Which airline had the most direct flights, windowed every 1 minute with a 30 seconds delay?
+# Print df_airports
+df_airports.show()
+
+df_flights.printSchema()
+
+# Find shortest flight based on difference between departure and arrival
 df_flights = df_flights \
-  .withWatermark("timestamp_received", "10 seconds") \
-  .filter(col("stops") == 0) \
-  .groupBy(window("timestamp_received", "1 minute", "30 seconds"), "airline") \
-  .agg(count("stops").alias("direct_flights")) \
+  .withColumn("flight_duration", col("arrival").cast("long") - col("departure").cast("long")) \
+  .groupBy([c for c in df_flights.columns if c != "flight_duration"]) \
+  .agg(min("flight_duration").alias("min_flight_duration")) \
+  .orderBy(col("min_flight_duration").asc()) \
+  .limit(5)
   
-df_flights_console = df_flights \
-  .orderBy(col("window").desc(), col("direct_flights").desc()) \
+  
+df_flights \
   .writeStream \
   .trigger(processingTime="2 seconds") \
   .outputMode("complete") \
   .format("console") \
   .option("truncate", "false") \
-  .start()
-
-df_flights_hdfs = df_flights \
-  .writeStream \
-  .trigger(processingTime="2 seconds") \
-  .outputMode("append") \
-  .format("json") \
-  .option("path", HDFS_NAMENODE + "/data/query3") \
-  .option("checkpointLocation", HDFS_NAMENODE + "/tmp/query3_checkpoint") \
   .start()
 
 spark.streams.awaitAnyTermination()

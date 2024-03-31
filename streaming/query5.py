@@ -64,7 +64,7 @@ HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 # Read the CSV file
 df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 
-# Calculate the average price of flight for each airline, windowed every 1 minute with a 30 seconds delay
+# Calculate the average price of flight for each airline, windowed every 1 minute with a 30 seconds delay.
 df_flights = df_flights \
   .groupBy(window(df_flights.timestamp_received, "1 minute", "30 seconds"), "airline") \
   .agg(F.round(avg("price"), 2).alias("avg_price")) \

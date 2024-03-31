@@ -3,6 +3,8 @@ from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import col
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+from quietlogs import quiet_logs
 
 MONGO_DATABASE = "flights"
 MONGO_COLLECTION = "query1"
@@ -21,12 +23,20 @@ spark = SparkSession \
     .config('spark.jars.packages','org.mongodb.spark:mongo-spark-connector_2.12:3.0.2') \
     .getOrCreate()
 
+quiet_logs(spark)
+
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
+
 # Find most expensive flight from each startingAirport
-QUERY1 = df.select("startingAirport", "totalFare") \
-           .groupBy("startingAirport") \
-           .max("totalFare")
+
+windowSpec = Window.partitionBy("startingAirport")
+
+QUERY1 = df \
+    .withColumn("maxTotalFare", F.max("totalFare").over(windowSpec)) \
+    .where(col("totalFare") == col("maxTotalFare")) \
+    .select("startingAirport", "totalFare") \
+    .distinct()
 
 QUERY1.show()
 

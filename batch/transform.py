@@ -5,12 +5,7 @@ from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import col
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
-
-# Logs
-def quiet_logs(sc):
-  logger = sc._jvm.org.apache.log4j
-  logger.LogManager.getLogger("org"). setLevel(logger.Level.ERROR)
-  logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
+from quietlogs import quiet_logs
 
 # Create a SparkSession
 spark = SparkSession \

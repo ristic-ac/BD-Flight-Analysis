@@ -43,6 +43,8 @@ from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import col, concat_ws, sort_array, array, array_sort
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+from quietlogs import quiet_logs
 
 MONGO_DATABASE = "flights"
 MONGO_COLLECTION = "query9"
@@ -61,38 +63,32 @@ spark = SparkSession \
     .config('spark.jars.packages','org.mongodb.spark:mongo-spark-connector_2.12:3.0.2') \
     .getOrCreate()
 
+quiet_logs(spark)
+
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 # df.show()
 
 df.printSchema()
 
-# Sort by available seats descending, extract number of seatsRemaning
-QUERY9 = df.orderBy(col("seatsRemaining").desc()).limit(10) \
+# Determine price difference between consecutive flights
 
-maxSeats = QUERY9.select(col("seatsRemaining")) \
-    .collect()[0][0]
+windowSpec = Window.partitionBy("legId").orderBy("searchDate")
 
-print(maxSeats)
-
-# Select those with the maximum number of seats
-QUERY9 = QUERY9.filter(col("seatsRemaining") == maxSeats) \
-               .select(
-                   col("legId"),
-                   col("flightDate"),
-                   col("startingAirport"),
-                   col("destinationAirport"),
-                   col("seatsRemaining"),
-               )
-        
-    
+QUERY9 = df \
+    .withColumn("priceDiff", F.round(F.col("totalFare") - F.lag("totalFare", 1).over(windowSpec), 2)) \
+    .withColumn("flightDateRaw", F.col("segmentsDepartureTimeRaw").getItem(0)) \
+    .select("legId", "searchDate", "totalFare", "startingAirport", "destinationAirport", "flightDate", "flightDateRaw", "priceDiff") \
+    .filter(F.col("priceDiff") > 0) \
+    .orderBy("priceDiff", ascending=False)
+  
 # # Print on console
 QUERY9.show()
 
-# QUERY9 \
-#     .write.format("com.mongodb.spark.sql.DefaultSource") \
-#     .mode("overwrite") \
-#     .option("uri", OUTPUT_URI) \
-#     .option("database", MONGO_DATABASE) \
-#     .option("collection", MONGO_COLLECTION) \
-#     .save()
+QUERY9 \
+    .write.format("com.mongodb.spark.sql.DefaultSource") \
+    .mode("overwrite") \
+    .option("uri", OUTPUT_URI) \
+    .option("database", MONGO_DATABASE) \
+    .option("collection", MONGO_COLLECTION) \
+    .save()

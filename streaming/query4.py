@@ -64,7 +64,7 @@ HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 # Read the CSV file
 df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 
-# Calculate the maximum price for each departure_code, windowed every 1 minute with a 30 seconds delay
+# Calculate the maximum price for each departure_code, windowed every 1 minute with a 30 seconds delay.
 df_flights = df_flights \
   .groupBy(window(df_flights.timestamp_received, "1 minute", "30 seconds"), "departure_code") \
   .agg(max("price").alias("max_price")) \

@@ -4,6 +4,7 @@ from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import col
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
+from quietlogs import quiet_logs
 
 MONGO_DATABASE = "flights"
 MONGO_COLLECTION = "query2"
@@ -22,13 +23,14 @@ spark = SparkSession \
     .config('spark.jars.packages','org.mongodb.spark:mongo-spark-connector_2.12:3.0.2') \
     .getOrCreate()
 
-df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
+quiet_logs(spark)
 
-# df.show()
+df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 df.printSchema()
 
 # For each airport, determine the flight on the 4th of July for which there were the average available seats to BOS 
+
 QUERY2 = df.filter((df.flightDate == "2022-04-17") & (df.destinationAirport == "BOS")) \
            .groupBy("startingAirport") \
            .agg(F.round(F.avg("seatsRemaining"), 2).alias("avgSeatsRemaining"))

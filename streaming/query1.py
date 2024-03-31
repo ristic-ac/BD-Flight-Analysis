@@ -56,12 +56,19 @@ df_airports.show()
 
 df_flights.printSchema()
 
-# Find most presented departure arrival pair in df_flights
-df_flights \
-  .groupBy("departure_code", "arrival_code") \
+# Find most presented departure,arrival column pair in df_flights, windowed by 15 minutes with 5 minutes sliding interval
+df_flights = df_flights \
+  .withWatermark("departure", "15 minutes") \
+  .groupBy(
+    window("departure", "15 minutes", "5 minutes"),
+    "departure_code", "arrival_code"
+  ) \
   .count() \
-  .orderBy(col("count").desc()) \
-  .writeStream \
+  .orderBy("window", "count", ascending=False)
+
+
+# Print 
+df_flights.writeStream \
   .outputMode("complete") \
   .format("console") \
   .option("truncate", "false") \

@@ -64,7 +64,7 @@ HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 # Read the CSV file
 df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 
-# Which airline had the most direct flights? Implement a window of 1 minute with a sliding interval of 30 seconds
+# Which airline had the most direct flights, windowed every 1 minute with a 30 seconds delay?
 df_flights = df_flights \
   .filter(col("stops") == 0) \
   .groupBy(window(df_flights.timestamp_received, "1 minute", "30 seconds"), "airline") \

@@ -79,6 +79,30 @@ services:
     env_file:
       - ./config/hadoop.env
   
+  spark-worker3:
+    image: bde2020/spark-worker:3.0.1-hadoop3.2
+    container_name: spark-worker3
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    ports:
+      - 8083:8081
+    env_file:
+      - ./config/hadoop.env
+  
+  spark-worker4:
+    image: bde2020/spark-worker:3.0.1-hadoop3.2
+    container_name: spark-worker4
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    ports:
+      - 8084:8081
+    env_file:
+      - ./config/hadoop.env
+
   hue:
     image: gethue/hue:20201111-135001
     hostname: hue

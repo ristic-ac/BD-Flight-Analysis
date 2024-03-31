@@ -2,8 +2,6 @@ docker exec -it mongodb bash
 mongosh
 use flights
 db.createCollection("flights_germany")
-db.flights_germany.find().pretty()
-# After creating database and collection, account for metabase should be created
 use admin
 db.createUser(
   {
@@ -12,5 +10,13 @@ db.createUser(
     roles: [ { role: "readWrite", db: "flights" } ]
   }
 )
-# Check if the user was created
 db.getUsers()
+
+# URL: mongodb
+# Database Name: flights
+# Port: 27017
+# Username: metabase
+# Password: metabase
+# Authentication Database Name: admin
+
+# Collection Name: flights_germany

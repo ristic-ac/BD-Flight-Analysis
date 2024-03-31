@@ -166,3 +166,6 @@ metabase-data/
 producer/flights_germany.csv
 sample_data/flights_germany.csv
 .vscode/settings.json
+sample_data/itineraries_sample.csv
+sample_data/itineraries_sample_2GB.csv
+sample_data/itineraries_sample_200MB.csv

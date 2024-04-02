@@ -87,10 +87,10 @@ QUERY8 = df.filter(df.travelDurationMinutes < minTravelTime + 5) \
 # # Print on console
 QUERY8.show()
 
-# QUERY8 \
-#     .write.format("com.mongodb.spark.sql.DefaultSource") \
-#     .mode("overwrite") \
-#     .option("uri", OUTPUT_URI) \
-#     .option("database", MONGO_DATABASE) \
-#     .option("collection", MONGO_COLLECTION) \
-#     .save()
+QUERY8 \
+    .write.format("com.mongodb.spark.sql.DefaultSource") \
+    .mode("overwrite") \
+    .option("uri", OUTPUT_URI) \
+    .option("database", MONGO_DATABASE) \
+    .option("collection", MONGO_COLLECTION) \
+    .save()

@@ -96,10 +96,10 @@ QUERY10 = df \
 # # Print on console
 QUERY10.show()
 
-# QUERY10 \
-#     .write.format("com.mongodb.spark.sql.DefaultSource") \
-#     .mode("overwrite") \
-#     .option("uri", OUTPUT_URI) \
-#     .option("database", MONGO_DATABASE) \
-#     .option("collection", MONGO_COLLECTION) \
-#     .save()
+QUERY10 \
+    .write.format("com.mongodb.spark.sql.DefaultSource") \
+    .mode("overwrite") \
+    .option("uri", OUTPUT_URI) \
+    .option("database", MONGO_DATABASE) \
+    .option("collection", MONGO_COLLECTION) \
+    .save()

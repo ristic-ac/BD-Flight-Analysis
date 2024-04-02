@@ -82,10 +82,10 @@ QUERY7 = df.withColumn("departureTime", F.col("segmentsDepartureTimeRaw")[0]) \
 # # Print on console
 QUERY7.show()
 
-# QUERY7 \
-#     .write.format("com.mongodb.spark.sql.DefaultSource") \
-#     .mode("overwrite") \
-#     .option("uri", OUTPUT_URI) \
-#     .option("database", MONGO_DATABASE) \
-#     .option("collection", MONGO_COLLECTION) \
-#     .save()
+QUERY7 \
+    .write.format("com.mongodb.spark.sql.DefaultSource") \
+    .mode("overwrite") \
+    .option("uri", OUTPUT_URI) \
+    .option("database", MONGO_DATABASE) \
+    .option("collection", MONGO_COLLECTION) \
+    .save()

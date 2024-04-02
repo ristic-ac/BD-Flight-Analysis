@@ -7,7 +7,7 @@ from pyspark.sql import functions as F
 from quietlogs import quiet_logs
 
 MONGO_DATABASE = "flights"
-MONGO_COLLECTION = "query3"
+MONGO_COLLECTION = "query5"
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 
 INPUT_URI = "mongodb://mongodb:27017/" + MONGO_DATABASE + "." + MONGO_COLLECTION

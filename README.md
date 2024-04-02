@@ -1,11 +1,6 @@
 # BD-Flight-Analysis
 
-# TODO
-# BATCH Dodati bar 3 window fun
-# Do 3 vizualizovati
-
-# STREAMING sink rezultata upita, window spajanje vise tokova
-
+## Ukratko o projektu
 
 - Predmet: Arhitekture sistema velikih skupova podataka
 - Student: Branislav Ristić
@@ -19,6 +14,21 @@
         - Ukupno 5 upita se izvršava nad podacima.
     - Za vizuelizaciju se koristi Metabase.
     - Projekat se pokreće u Docker kontejnerima.
+- Prezentacija projekta sa prve kontrolne tačke: 
+    - [Prezentacija](https://docs.google.com/presentation/d/1P79nNnO7AUsNYs-LHnNLSZEaTdVp11BhIKNGegL6q8M/edit#slide=id.p)
+
+## Korišćeni podaci
+
+- Korišćeni podaci su preuzeti sa [Kaggle](https://www.kaggle.com/).
+
+- Skupovi podataka (oba pod CC BY 4.0 Deed licencom):
+    - Batch:
+        - [Flight prices](https://www.kaggle.com/datasets/dilwong/flightprices)
+    - Streaming:
+        - [German Air Fares](https://www.kaggle.com/datasets/darjand/domestic-german-air-fares)
+
+
+## Struktura projekta
 
 - Struktura repozitorijuma:
     - `batch/` - skripte za batch obradu podataka
@@ -35,16 +45,26 @@
             - `mongo.sh` - skripta generalnu manipulaciju sa MongoDB-om
         - `spark/` - skripte za rad sa Spark-om
             - `batch/` - skripte za pokretanje batch obrade
+                - `transform.sh` - skripta za transformaciju podataka
                 - `queryX.sh` - skripte za pokretanje određenog upita
             - `streaming/` - skripte za pokretanje streaming obrade
-                - `queryX.sh` - skripte za pokretanje određenog upita
-
+                - `queryX.sh` - skripte za pokretanje
     - `streaming/` - skripte za streaming obradu podataka
-    - `README.md` - opis projekta
     - `docker-compose.yaml` - konfiguracioni fajl za pokretanje klastera
+    - `prepare.sh` - skripta za pripremu okruženja
+    - `README.md` - opis projekta
     - `run.sh` - skripta za pokretanje klastera
 
+- Dijagram arhitekture:
 
+![Diagram](./diagrams/diagram.drawio.png)\
 
-![Diagram](./diagrams/diagram.drawio.png)
+## Pokretanje projekta
 
+1. Klonirati repozitorijum.
+2. Pozicionirati se u koreni direktorijum repozitorijuma.
+3. Pokrenuti docker kontejnere komandom `docker compose up --build`.
+4. Napraviti korisnika (ručno) u MongoDB bazi podataka u okviru `mongo.sh` skripte.
+5. Podesiti MetaBase aplikaciju.
+6. Pokrenuti skriptu `prepare.sh`.
+7. Pokrenuti skriptu `run.sh`.

@@ -53,14 +53,6 @@ HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 # Read the CSV file
 df = spark.read.csv(HDFS_NAMENODE + "/data/itineraries_sample.csv", header=True, schema=flight_schema)
 
-# Print the schema
-# df.printSchema()
-
-# Schema = |legId|searchDate|flightDate|startingAirport|destinationAirport|fareBasisCode|travelDuration|elapsedDays|isBasicEconomy|isRefundable|isNonStop|baseFare|totalFare|seatsRemaining|totalTravelDistance|segmentsDepartureTimeEpochSeconds|segmentsDepartureTimeRaw|segmentsArrivalTimeEpochSeconds|segmentsArrivalTimeRaw|segmentsArrivalAirportCode|segmentsDepartureAirportCode| segmentsAirlineName|segmentsAirlineCode|segmentsEquipmentDescription|segmentsDurationInSeconds|segmentsDistance|segmentsCabinCode|
-
-# Show first 20 rows
-# df.show(20)
-
 # From StringType() to ArrayType(IntegerType()), delimited by "||"
 def string_to_array_int(column):
     column_name = column._jc.toString()

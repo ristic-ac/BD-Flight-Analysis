@@ -3,13 +3,8 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
+from quietlogs import quiet_logs
 import os
-
-
-def quiet_logs(sc):
-  logger = sc._jvm.org.apache.log4j
-  logger.LogManager.getLogger("org"). setLevel(logger.Level.ERROR)
-  logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
 
 spark = SparkSession \
     .builder \
@@ -40,17 +35,8 @@ df_flights_raw = spark \
   .option("kafka.bootstrap.servers", "kafka1:19092") \
   .option("subscribe", "flights_germany") \
   .load() \
-  # .withColumn("parsed_value", from_json(col("value").cast("string"), schema)) \
-  # .select("parsed_value.*") \
 
 df_flights_raw.printSchema()
-#  |-- key: binary (nullable = true)
-#  |-- value: binary (nullable = true)
-#  |-- topic: string (nullable = true)
-#  |-- partition: integer (nullable = true)
-#  |-- offset: long (nullable = true)
-#  |-- timestamp: timestamp (nullable = true)
-#  |-- timestampType: integer (nullable = true)
 
 # Take timestamp and parsed value from the value column
 df_flights = df_flights_raw \
@@ -64,25 +50,21 @@ HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 # Read the CSV file
 df_airports = spark.read.csv(HDFS_NAMENODE + "/data/airports.csv", header=True)
 
-# Which airline had the most direct flights, windowed every 1 minute with a 30 seconds delay?
+# Which airline had the most direct flights, windowed every 30 seconds and sliding every 10 seconds (Sliding window)
 df_flights = df_flights \
-  .withWatermark("timestamp_received", "10 seconds") \
+  .withWatermark("timestamp_received", "1 seconds") \
   .filter(col("stops") == 0) \
-  .groupBy(window("timestamp_received", "1 minute", "30 seconds"), "airline") \
+  .groupBy(window("timestamp_received", "30 seconds", "10 seconds"), "airline") \
   .agg(count("stops").alias("direct_flights")) \
   
 df_flights_console = df_flights \
-  .orderBy(col("window").desc(), col("direct_flights").desc()) \
   .writeStream \
-  .trigger(processingTime="2 seconds") \
-  .outputMode("complete") \
+  .outputMode("append") \
   .format("console") \
   .option("truncate", "false") \
   .start()
 
-df_flights_hdfs = df_flights \
-  .writeStream \
-  .trigger(processingTime="2 seconds") \
+df_flights_hdfs = df_flights.writeStream \
   .outputMode("append") \
   .format("json") \
   .option("path", HDFS_NAMENODE + "/data/query3") \

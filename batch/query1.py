@@ -28,7 +28,7 @@ quiet_logs(spark)
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 
-# Find most expensive flight from each startingAirport
+# Find price of a most expensive flight from each startingAirport
 
 windowSpec = Window.partitionBy("startingAirport")
 

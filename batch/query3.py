@@ -38,10 +38,10 @@ QUERY3 = df \
     .select(
         col("startingAirport"),
         col("destinationAirport"),
-        col("totalFare"),
-        col("travelDurationMinutes"),
-        F.row_number().over(windowSpec).alias("rank")
+        col("totalFare")
     ) \
+    .distinct() \
+    .withColumn("rank", F.rank().over(windowSpec)) \
     .filter(col("rank") <= 10)
 
 

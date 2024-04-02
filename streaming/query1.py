@@ -2,13 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
+from quietlogs import quiet_logs
 import os
-
-
-def quiet_logs(sc):
-  logger = sc._jvm.org.apache.log4j
-  logger.LogManager.getLogger("org"). setLevel(logger.Level.ERROR)
-  logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
 
 spark = SparkSession \
     .builder \
@@ -43,9 +38,6 @@ df_flights = spark \
   .withColumn("timestamp_received", col("timestamp")) \
   .select("timestamp_received", "parsed_value.*") \
 
-  # .withColumn("value", F.col("value").cast("string")) \
-  # .select("value") \
-
 # Define HDFS namenode
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 
@@ -57,9 +49,9 @@ df_airports.show()
 
 df_flights.printSchema()
 
-# Find most presented departure,arrival column pair in df_flights, windowed by 15 minutes with 5 minutes sliding interval
+# Find most presented departure,arrival column pair in df_flights, windowed by 30 seconds and sliding every 5 seconds (Sliding window)
 df_flights = df_flights \
-  .withWatermark("timestamp_received", "10 seconds") \
+  .withWatermark("timestamp_received", "1 seconds") \
   .groupBy(
     window("timestamp_received", "30 seconds", "5 seconds"),
     "departure_code", "arrival_code"
@@ -67,10 +59,8 @@ df_flights = df_flights \
   .count() \
 
 df_flights_console = df_flights \
-  .orderBy(col("window").desc(), col("count").desc()) \
   .writeStream \
-  .trigger(processingTime="2 seconds") \
-  .outputMode("complete") \
+  .outputMode("append") \
   .format("console") \
   .option("truncate", "false") \
   .start()

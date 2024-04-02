@@ -2,13 +2,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+from quietlogs import quiet_logs
 import os
-
-
-def quiet_logs(sc):
-  logger = sc._jvm.org.apache.log4j
-  logger.LogManager.getLogger("org"). setLevel(logger.Level.ERROR)
-  logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
 
 spark = SparkSession \
     .builder \
@@ -42,9 +38,6 @@ df_flights = spark \
   .withColumn("parsed_value", from_json(col("value").cast("string"), schema)) \
   .select("parsed_value.*") \
 
-  # .withColumn("value", F.col("value").cast("string")) \
-  # .select("value") \
-
 # Define HDFS namenode
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 
@@ -56,19 +49,10 @@ df_airports.show()
 
 df_flights.printSchema()
 
-# Find shortest flight based on difference between departure and arrival
-df_flights = df_flights \
-  .withColumn("flight_duration", col("arrival").cast("long") - col("departure").cast("long")) \
-  .groupBy([c for c in df_flights.columns if c != "flight_duration"]) \
-  .agg(min("flight_duration").alias("min_flight_duration")) \
-  .orderBy(col("min_flight_duration").asc()) \
-  .limit(5)
-  
   
 df_flights_console = df_flights \
   .writeStream \
-  .trigger(processingTime="2 seconds") \
-  .outputMode("complete") \
+  .outputMode("append") \
   .format("console") \
   .option("truncate", "false") \
   .start()
@@ -77,8 +61,8 @@ df_flights_console = df_flights \
 df_flights_hdfs = df_flights.writeStream \
   .outputMode("append") \
   .format("json") \
-  .option("path", HDFS_NAMENODE + "/data/query1") \
-  .option("checkpointLocation", HDFS_NAMENODE + "/tmp/query1_checkpoint") \
+  .option("path", HDFS_NAMENODE + "/data/query2") \
+  .option("checkpointLocation", HDFS_NAMENODE + "/tmp/query2_checkpoint") \
   .start() 
 
 spark.streams.awaitAnyTermination()

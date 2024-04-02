@@ -67,7 +67,6 @@ df_flights = df_flights \
   
 df_flights \
   .writeStream \
-  .trigger(processingTime="2 seconds") \
   .outputMode("complete") \
   .format("console") \
   .option("truncate", "false") \

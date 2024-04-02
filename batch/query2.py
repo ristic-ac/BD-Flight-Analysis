@@ -29,7 +29,7 @@ df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
 df.printSchema()
 
-# For each airport, determine the flight on the 4th of July for which there were the average available seats to BOS 
+# For each airport, determine the flight on the 17th of April for which there were the average available seats to BOS 
 
 QUERY2 = df.filter((df.flightDate == "2022-04-17") & (df.destinationAirport == "BOS")) \
            .groupBy("startingAirport") \

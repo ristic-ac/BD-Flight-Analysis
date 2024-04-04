@@ -49,7 +49,7 @@ df_airports.show()
 
 df_flights.printSchema()
 
-# Find most presented departure,arrival column pair in df_flights, windowed by 30 seconds and sliding every 5 seconds (Sliding window)
+# Find most presented departure,arrival column pair, windowed by 30 seconds and sliding every 5 seconds (Sliding window)
 df_flights = df_flights \
   .withWatermark("timestamp_received", "1 seconds") \
   .groupBy(

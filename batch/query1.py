@@ -49,7 +49,6 @@ QUERY1 = df \
 
 QUERY1.show()
 
-# Select group by startingAirport aggregate max totalFare and write to mongodb
 QUERY1 \
     .write.format("com.mongodb.spark.sql.DefaultSource") \
     .mode("overwrite") \

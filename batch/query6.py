@@ -33,7 +33,6 @@ QUERY6 = df.select(F.explode("segmentsArrivalAirportCode").alias("arrivalAirport
            .orderBy(col("count").desc()) \
            .limit(1)
 
-# # Print on console
 QUERY6.show()
 
 QUERY6 \

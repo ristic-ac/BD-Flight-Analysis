@@ -68,3 +68,28 @@
 5. Podesiti MetaBase aplikaciju.
 6. Pokrenuti skriptu `prepare.sh`.
 7. Pokrenuti skriptu `run.sh`.
+
+
+## Upiti
+
+### Batch upiti
+
+1. Odrediti cenu najskupljeg leta za svaki od polaznih aerodroma.
+2. Za svaki aerodrom, odrediti na dan 17.04. prosečan broj slobodnih mesta ka aerodromu u Bostonu.
+3. Odrediti 10 najskuplje zabeleženih letova.
+4. Odrediti 10% najskuplje zabelenih letova.
+5. Odredti prosečan iznos taksi i naknada za letove iz Los Anđelesa.
+6. Odrediti aerodrom sa najvećim brojem sletanja.
+7. Odrediti broj letova koji koji su poletali između 00:00 i 04:00.
+8. Odrediti parove od-do aerodroma sa najmanjim trajanjem putivanja, uključiti i one koji imaju do 5 minuta razlike.
+9. Odrediti razlike u cenama između uzastopnih merenja letova.
+10. Odrediti merenja letova koja imaju cenu veću nego u proseku 3 prethodna merenja. Koristeći te podatke izračunati koliko bi se novaca potrošilo na takve letove kada bi se kupila po jedna karta.
+11. Odrediti odnos merenja ekonomske klase za svaki od polaznih aerodroma.
+
+### Streaming upiti
+
+1. Odrediti najzastupljeniji od-do par aerodroma koristeći klizeći prozor od 30 sekundi sa korakom od 5 sekundi.
+2. Odrediti 5 letova sa najmanjem trajanjem putovanja.
+3. Odrediti letove koji nemaju presedanja, koristeći klizeći prozor od 30 sekundi sa korakom od 10 sekundi.
+4. Odrediti maksimalnu cenu leta za svaki od polaznih aerodroma koristeći kotrljajući prozor širine 30 sekundi.
+5. Izračunati prosečnu cenu letova za svaku aero-kompaniju koristeći kotrljajući prozor širine 30 sekundi.

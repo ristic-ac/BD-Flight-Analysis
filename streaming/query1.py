@@ -36,7 +36,7 @@ df_flights = spark \
   .load() \
   .withColumn("parsed_value", from_json(col("value").cast("string"), schema)) \
   .withColumn("timestamp_received", col("timestamp")) \
-  .select("timestamp_received", "parsed_value.*") \
+  .select("timestamp_received", "parsed_value.*")
 
 # Define HDFS namenode
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
@@ -56,7 +56,7 @@ df_flights = df_flights \
     window("timestamp_received", "30 seconds", "5 seconds"),
     "departure_code", "arrival_code"
   ) \
-  .count() \
+  .agg(count("departure_code").alias("count")) 
 
 df_flights_console = df_flights \
   .writeStream \

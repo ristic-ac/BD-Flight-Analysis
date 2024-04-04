@@ -28,8 +28,6 @@ quiet_logs(spark)
 
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
-df.printSchema()
-
 # Find top 10% of itineraries with the highest total fare
 windowSpec = Window.orderBy(col("totalFare").desc())
 
@@ -38,9 +36,9 @@ QUERY4 = df \
         col("startingAirport"),
         col("destinationAirport"),
         col("totalFare"),
-        F.cume_dist().over(windowSpec).alias("rank")
+        F.cume_dist().over(windowSpec).alias("cume_dist")
     ) \
-    .filter(col("rank") <= 0.1)
+    .filter(col("cume_dist") <= 0.1)
 
 # # Print on console
 QUERY4.show()

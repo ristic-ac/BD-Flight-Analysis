@@ -27,10 +27,6 @@ quiet_logs(spark)
 
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
-# df.show()
-
-df.printSchema()
-
 # Determine average tax for flights from LAX
 QUERY5 = df.filter(df["startingAirport"] == "LAX") \
            .withColumn("tax", F.round(col("totalFare") - col("baseFare"), 2)) \

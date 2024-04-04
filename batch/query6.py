@@ -16,7 +16,7 @@ OUTPUT_URI = INPUT_URI
 # Create a SparkSession
 spark = SparkSession \
     .builder \
-    .appName("Python Spark SQL - Query 4") \
+    .appName("Python Spark SQL - Query 6") \
     .master('local')\
     .config("spark.mongodb.input.uri", INPUT_URI) \
     .config("spark.mongodb.output.uri", OUTPUT_URI) \
@@ -26,8 +26,6 @@ spark = SparkSession \
 quiet_logs(spark)
 
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
-
-df.printSchema()
 
 # Determine the airport with the most number of landing flights 
 QUERY6 = df.select(F.explode("segmentsArrivalAirportCode").alias("arrivalAirport")) \

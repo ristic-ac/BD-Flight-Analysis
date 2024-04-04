@@ -8,11 +8,18 @@ docker exec -it namenode bash -c "hadoop fs -mkdir /data"
 
 echo "Copying data into HDFS"
 
-docker exec -it namenode bash -c "hadoop fs -put /data/itineraries_sample.csv /data/"
+files=(
+    "/data/itineraries_sample.csv"
+    "/data/airports.csv"
+    "/data/airport_coords.csv"
+)
 
-echo "Listing data in HDFS"
+for file in "${files[@]}"; do
+    echo "Copying $file into HDFS"
+    docker exec -it namenode bash -c "hadoop fs -put $file /data/"
+done
 
-docker exec -it namenode bash -c "hadoop fs -put /data/airports.csv /data/"
+echo "Data copied into HDFS"
 
 echo "Listing data in HDFS"
 

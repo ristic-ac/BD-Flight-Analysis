@@ -1,13 +1,14 @@
 from datetime import datetime
 import os
 from pyspark.sql import SparkSession, Row
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, concat_ws, sort_array, array, array_sort
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
 from quietlogs import quiet_logs
 
 MONGO_DATABASE = "flights"
-MONGO_COLLECTION = "query7"
+MONGO_COLLECTION = "query11"
 HDFS_NAMENODE = os.environ["CORE_CONF_fs_defaultFS"]
 
 INPUT_URI = "mongodb://mongodb:27017/" + MONGO_DATABASE + "." + MONGO_COLLECTION
@@ -16,7 +17,7 @@ OUTPUT_URI = INPUT_URI
 # Create a SparkSession
 spark = SparkSession \
     .builder \
-    .appName("Python Spark SQL - Query 7") \
+    .appName("Python Spark SQL - Query 11") \
     .master('local')\
     .config("spark.mongodb.input.uri", INPUT_URI) \
     .config("spark.mongodb.output.uri", OUTPUT_URI) \
@@ -27,19 +28,21 @@ quiet_logs(spark)
 
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
-# Determine the number of flights that depart between 00:00 and 04:00 for each airport
-QUERY7 = df.withColumn("departureTime", F.col("segmentsDepartureTimeRaw")[0]) \
-           .withColumn("hour", F.hour(F.col("departureTime"))) \
-           .select("startingAirport", "destinationAirport", "departureTime", "hour") \
-           .filter((F.col("hour") >= 0) & (F.col("hour") <= 4)) \
-           .groupBy("startingAirport") \
-           .count() \
-      
+# Determine the ratio of isBasicEconomy by startingAirport
+window1 = Window.partitionBy("startingAirport", "isBasicEconomy")
+window2 = Window.partitionBy("startingAirport")
 
+QUERY11 = df \
+    .withColumn("ratio", F.round(F.count("isBasicEconomy").over(window1) / F.count("*").over(window2), 4)) \
+    .select("startingAirport", "isBasicEconomy", "ratio") \
+    .distinct() \
+    .sort("startingAirport", "isBasicEconomy")
+        
+    
 # # Print on console
-QUERY7.show()
+QUERY11.show()
 
-QUERY7 \
+QUERY11 \
     .write.format("com.mongodb.spark.sql.DefaultSource") \
     .mode("overwrite") \
     .option("uri", OUTPUT_URI) \

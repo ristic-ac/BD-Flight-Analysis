@@ -28,8 +28,6 @@ quiet_logs(spark)
 
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
-df.printSchema()
-
 # Find the top 10 itineraries with the highest total fare
 
 windowSpec = Window.orderBy(col("totalFare").desc())

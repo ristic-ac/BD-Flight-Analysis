@@ -27,6 +27,11 @@ quiet_logs(spark)
 
 df = spark.read.json(HDFS_NAMENODE + "/data/itineraries_sample_array.json")
 
+airport_coordinates = spark.read.csv(HDFS_NAMENODE + "/data/airport_coords.csv", header=True)
+
+airport_coordinates.printSchema()
+
+airport_coordinates.show()
 
 # Find price of a most expensive flight from each startingAirport
 
@@ -36,7 +41,11 @@ QUERY1 = df \
     .withColumn("maxTotalFare", F.max("totalFare").over(windowSpec)) \
     .where(col("totalFare") == col("maxTotalFare")) \
     .select("startingAirport", "totalFare") \
-    .distinct()
+    .distinct() \
+    .join(airport_coordinates, df.startingAirport == airport_coordinates.code, "left") \
+    .select("startingAirport", "totalFare", "lat", "long") \
+    .withColumn("lat", col("lat").cast(FloatType())) \
+    .withColumn("long", col("long").cast(FloatType()))
 
 QUERY1.show()
 

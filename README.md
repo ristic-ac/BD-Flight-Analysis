@@ -14,8 +14,6 @@
         - Ukupno 5 upita se izvršava nad podacima.
     - Za vizuelizaciju se koristi Metabase.
     - Projekat se pokreće u Docker kontejnerima.
-- Prezentacija projekta sa prve kontrolne tačke: 
-    - [Prezentacija](https://docs.google.com/presentation/d/1P79nNnO7AUsNYs-LHnNLSZEaTdVp11BhIKNGegL6q8M/edit#slide=id.p)
 
 ## Korišćeni podaci
 
